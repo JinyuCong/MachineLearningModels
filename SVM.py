@@ -17,7 +17,7 @@ class SVM:
         self.lr = lr
         self.epochs = epochs
 
-    def _rbf_kernel(self, X1, X2):
+    def _rbf_kernel(self, X1: np.array, X2: np.array):
         """
         X1: (n1, d)
         X2: (n2, d)
@@ -31,6 +31,9 @@ class SVM:
                 K[i, j] = np.exp(-gamma * np.linalg.norm(X1[i] - X2[j]) ** 2)
         return K
 
+    def _linear_kernel(self, X1: np.array, X2: np.array):
+        return X1 @ X2.T
+
     def fit(self, X, y):
         self.X = X
         self.y = y
@@ -39,7 +42,7 @@ class SVM:
 
         if self.kernel == "linear":
             # linear kernel
-            K = X @ X.T
+            K = self._linear_kernel(X, X)
             Q = (y @ y.T) * K
 
             for _ in range(self.epochs):
