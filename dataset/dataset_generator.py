@@ -1,0 +1,56 @@
+from ctypes import pointer
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+ROUND_CENTERS = [(0, 0), (0.5, 5), (5.5, 0), (5.5, 5.5)]
+SHEAR_CENTERS = [(0, 1), (1, -1)]
+
+def round_cluster(centers: list[tuple], per_cluster_p: int = 50, seed: int = 0):
+    rng = np.random.default_rng(seed)
+    centers = np.array(centers, dtype=float)
+    points = np.repeat(centers, per_cluster_p, axis=0)
+    points += rng.normal(scale=0.5, size=(points.shape[0], points.shape[1]))
+        
+    ext_points = np.array([
+        [9.5, 9.5],
+        [-5.0, -5.0]
+    ])
+    points = np.vstack([points, ext_points])
+    np.random.shuffle(points)
+    return points
+
+
+def shear_cluster(centers: list[tuple], per_cluster_p: int = 50, seed: int = 0):
+    def shear(X: np.ndarray, k: float):
+        shear_M = np.array([
+            [1, k],
+            [0, 1],
+        ])
+        return X @ shear_M
+    
+    rng = np.random.default_rng(seed)
+    centers = np.array(centers, dtype=float)
+    points = np.repeat(centers, per_cluster_p, axis=0)
+    points += rng.normal(scale=0.3, size=(points.shape[0], points.shape[1]))
+    shear_points = shear(points, 1)
+    np.random.shuffle(shear_points)
+    return shear_points
+
+
+def plot_points(points: np.ndarray, centers: np.ndarray = None):
+    plt.figure(figsize=(8, 6))
+    plt.scatter(x=points[:, 0], y=points[:, 1], c="blue", label="point")
+    if centers is not None:
+        plt.scatter(x=centers[:, 0], y=centers[:, 1], c="red", label="center")
+    plt.xlabel("dim1")
+    plt.ylabel("dim2")
+    plt.legend()
+    plt.show()
+    plt.close()
+    
+    
+if __name__ == "__main__":
+    points = shear_cluster(SHEAR_CENTERS)
+    plot_points(points)
